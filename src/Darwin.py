@@ -21,11 +21,16 @@ class Darwin(QWidget):
     @magicgui(call_button="Start simulation")
     def simulate(self, map_height=10, map_width=10, n_predators=10, n_preys=10, n_epochs=10):
         def _update_map():
+            # Reset the map
+            self.map = np.zeros((map_height, map_width), dtype=np.uint8)
+
+            # Setup each individual
             for pred in self.predators:
                 self.map[pred.y, pred.x] = 255
             for prey in self.preys:
                 self.map[prey.y, prey.x] = 128
 
+            # Add map to viewer
             if 'map' in self.viewer.layers:
                 self.viewer.layers['map'].data = self.map
             else:
@@ -38,7 +43,6 @@ class Darwin(QWidget):
             self.preys = [Prey('genes', randint(0, map_height-1), randint(0, map_width-1)) for _ in range(n_preys)]
 
             # Initialising the map
-            self.map = np.zeros((map_height, map_width), dtype=np.uint8)
             _update_map()
 
             # Looping
