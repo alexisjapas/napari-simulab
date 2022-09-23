@@ -25,54 +25,63 @@ class Individual():
         return decision
 
 
+    def move(self):
+        # Mouvement boudings
+        mov_pred_y = 0
+        mov_pred_x = 0
+        if self.decision == 'move_up':
+            mov_pred_y += 1
+        elif self.decision == 'move_down':
+            mov_pred_y -= 1
+        elif self.decision == 'move_right':
+            mov_pred_x += 1
+        elif self.decision == 'move_left':
+            mov_pred_x -= 1
+        # Map boundings
+        if self.y + mov_pred_y >= map.shape[0] or self.y + mov_pred_y < 0:
+            mov_pred_y = 0
+            update_map = 1
+        if self.x + mov_pred_x >= map.shape[1] or self.x + mov_pred_x < 0:
+            mov_pred_x = 0
+            update_map = 1
+        # Other individuals boundings
+        if map[self.y + mov_pred_y, self.x] != 0:
+            mov_pred_y = 0
+            update_map = 1
+        if map[self.y, self.x + mov_pred_x] != 0:
+            mov_pred_x = 0
+            update_map = 1
+        # Proceed
+        self.y += mov_pred_y
+        self.x += mov_pred_x
+        self.energy -= self.cost_moving
+
+
+    def rest(self):
+        self.energy -= self.cost_resting
+
+
+    def eat(self):
+        self.energy -= self.cost_eating
+        if self.energy > 0:
+            self.energy += self.reward_eating
+
+
     def act(self, map):
         # Decision
-        decision = self.decide()
+        self.decision = self.decide()
         update_map = 0
 
-        if decision.startswith("move"):  # MOVING
-            # Mouvement boudings
-            mov_pred_y = 0
-            mov_pred_x = 0
-            if decision == 'move_up':
-                mov_pred_y += 1
-            elif decision == 'move_down':
-                mov_pred_y -= 1
-            elif decision == 'move_right':
-                mov_pred_x += 1
-            elif decision == 'move_left':
-                mov_pred_x -= 1
-            # Map boundings
-            if self.y + mov_pred_y >= map.shape[0] or self.y + mov_pred_y < 0:
-                mov_pred_y = 0
-                update_map = 1
-            if self.x + mov_pred_x >= map.shape[1] or self.x + mov_pred_x < 0:
-                mov_pred_x = 0
-                update_map = 1
-            # Other individuals boundings
-            if map[self.y + mov_pred_y, self.x] != 0:
-                mov_pred_y = 0
-                update_map = 1
-            if map[self.y, self.x + mov_pred_x] != 0:
-                mov_pred_x = 0
-                update_map = 1
-            # Proceed
-            self.y += mov_pred_y
-            self.x += mov_pred_x
-            self.energy -= self.cost_moving
-
-        elif decision == "rest":  # RESTING
-            self.energy -= self.cost_resting
-
-        elif decision == "eat":  # EATING
-            self.energy -= self.cost_eating
-            if self.energy > 0:
-                self.energy += self.reward_eating
-
+        if self.decision.startswith("move"):  # MOVING
+            self.move()
+        elif self.decision == "rest":  # RESTING
+            self.rest()
+        elif self.decision == "eat":  # EATING
+            self.eat()
         elif decision == "reproduce":  # REPRODUCING
-            pass
+            self.reproduce()
 
-        # Consequencies of life
+        # Consequencies of life x.x
         if self.energy <= 0:
             update_map = 1
 
