@@ -36,8 +36,7 @@ class Individual():
 
 
     def move(self, map):
-        update_map = 0
-        # Mouvement boudings
+        # Mouvement decision
         mov_pred_y = 0
         mov_pred_x = 0
         if self.decision == 'move_up':
@@ -48,35 +47,30 @@ class Individual():
             mov_pred_x += 1
         elif self.decision == 'move_left':
             mov_pred_x -= 1
+
         # Map boundings
         if self.y + mov_pred_y >= map.shape[0] or self.y + mov_pred_y < 0:
             mov_pred_y = 0
-            update_map = 1
         if self.x + mov_pred_x >= map.shape[1] or self.x + mov_pred_x < 0:
             mov_pred_x = 0
-            update_map = 1
+
         # Other individuals boundings
         if map[self.y + mov_pred_y, self.x] != 0:
             mov_pred_y = 0
-            update_map = 1
         if map[self.y, self.x + mov_pred_x] != 0:
             mov_pred_x = 0
-            update_map = 1
+
         # Proceed
         self.y += mov_pred_y
         self.x += mov_pred_x
-        self.energy -= self.cost_moving
-        return update_map
+
+        return mov_pred_y != 0 or mov_pred_x != 0
 
     def rest(self):
-        self.energy -= self.cost_resting
         return 0
 
 
     def eat(self):
-        self.energy -= self.cost_eating
-        if self.energy > 0:
-            self.energy += self.reward_eating
         return 0
 
 
@@ -120,10 +114,15 @@ class Individual():
         update_map = 0
         if self.decision.startswith("move"):  # MOVING
             update_map = self.move(map)
+            self.energy -= self.cost_moving
         elif self.decision == "rest":  # RESTING
             update_map = self.rest()
+            self.energy -= self.cost_resting
         elif self.decision == "eat":  # EATING
             update_map = self.eat()
+            self.energy -= self.cost_eating
+            if self.energy > 0:
+                self.energy += self.reward_eating
         elif self.decision == "reproduce":  # REPRODUCING
             if self.energy > 80:
                 update_map = self.reproduce(map)
