@@ -21,7 +21,19 @@ class Darwin(QWidget):
 
 
     @magicgui(call_button="Start simulation")
-    def simulate(self, map_height=100, map_width=100, n_individuals=100, n_epochs=250, dt=0.04, max_energy=100, energy=100, cost_moving=5, cost_resting=1, cost_eating=2, reward_eating=7):
+    def simulate(self,
+                 map_height=100,
+                 map_width=100,
+                 n_individuals=100,
+                 n_epochs=250,
+                 dt=0.04,
+                 max_energy=100,
+                 energy=100,
+                 cost_moving=5,
+                 cost_resting=1,
+                 cost_eating=2,
+                 reward_eating=7,
+                 cost_reproducting=10):
         def _update_viewer(map):
             # Add map to viewer
             if 'map' in self.viewer.layers:
@@ -40,7 +52,7 @@ class Darwin(QWidget):
                     self.individuals.pop(index)
                     self.n_individuals -= 1
                 else:
-                    self.map[indi.y, indi.x] = 255
+                    self.map[indi.y, indi.x] = randint(100, 256)
                     index += 1  # Only increase the index when not poping item
 
         @thread_worker
@@ -50,7 +62,18 @@ class Darwin(QWidget):
             shuffle(y_pos)
             x_pos = [x * map_width // self.n_individuals for x in range(0, self.n_individuals)]
             shuffle(x_pos)
-            self.individuals = [Individual('genes', y_pos.pop(0), x_pos.pop(0), max_energy, energy, cost_moving, cost_resting, cost_eating, reward_eating, i) for i in range(self.n_individuals)]
+            self.individuals = [Individual(
+                lab=self,
+                genes=i,
+                y=y_pos.pop(0),
+                x=x_pos.pop(0),
+                max_energy=max_energy,
+                energy=energy,
+                cost_moving=cost_moving,
+                cost_resting=cost_resting,
+                cost_eating=cost_eating,
+                reward_eating=reward_eating,
+                cost_reproducting=cost_reproducting) for i in range(self.n_individuals)]
 
             # Initialising the map
             _update_positions()
