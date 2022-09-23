@@ -2,7 +2,7 @@ from random import randint, seed
 
 
 class Individual():
-    def __init__(self, genes, y, x, max_energy, energy, cost_moving, cost_resting, cost_eating, seed) -> None:
+    def __init__(self, genes, y, x, max_energy, energy, cost_moving, cost_resting, cost_eating, reward_eating, seed) -> None:
         super().__init__()
         self.genes = genes
         self.y = y
@@ -12,6 +12,7 @@ class Individual():
         self.cost_moving = cost_moving
         self.cost_resting = cost_resting
         self.cost_eating = cost_eating
+        self.reward_eating = reward_eating
         self.decision = ['move_up', 'move_down', 'move_right', 'move_left', 'rest', 'eat', 'reproduce']
         self.seed = seed
 
@@ -64,7 +65,9 @@ class Individual():
             self.energy -= self.cost_resting
 
         elif decision == "eat":  # EATING
-            self.energy = min(self.energy - self.cost_eating, self.max_energy)
+            self.energy -= self.cost_eating
+            if self.energy > 0:
+                self.energy += self.reward_eating
 
         elif decision == "reproduce":  # REPRODUCING
             pass

@@ -21,7 +21,7 @@ class Darwin(QWidget):
 
 
     @magicgui(call_button="Start simulation")
-    def simulate(self, map_height=100, map_width=100, n_individuals=100, n_epochs=250, dt=0.04, max_energy=100, energy=100, cost_moving=5, cost_resting=1, cost_eating=-7):
+    def simulate(self, map_height=100, map_width=100, n_individuals=100, n_epochs=250, dt=0.04, max_energy=100, energy=100, cost_moving=5, cost_resting=1, cost_eating=2, reward_eating=7):
         def _update_viewer(map):
             # Add map to viewer
             if 'map' in self.viewer.layers:
@@ -50,7 +50,7 @@ class Darwin(QWidget):
             shuffle(y_pos)
             x_pos = [x * map_width // self.n_individuals for x in range(0, self.n_individuals)]
             shuffle(x_pos)
-            self.individuals = [Individual('genes', y_pos.pop(0), x_pos.pop(0), max_energy, energy, cost_moving, cost_resting, cost_eating, i) for i in range(self.n_individuals)]
+            self.individuals = [Individual('genes', y_pos.pop(0), x_pos.pop(0), max_energy, energy, cost_moving, cost_resting, cost_eating, reward_eating, i) for i in range(self.n_individuals)]
 
             # Initialising the map
             _update_positions()
