@@ -1,5 +1,4 @@
 from time import sleep
-from qtpy.QtWidgets import QWidget, QVBoxLayout, QPushButton
 from magicgui import magicgui
 import numpy as np
 from random import randint, shuffle
@@ -8,19 +7,11 @@ from napari.qt.threading import thread_worker
 from Individual import Individual
 
 
-class Darwin(QWidget):
+class Darwin():
     def __init__(self, viewer) -> None:
         super().__init__()
         self.viewer = viewer
-        # Define the layout
-        layout = QVBoxLayout()
-        layout.addWidget(self.simulate.native)
-        self.button_stop = QPushButton('Stop simulation')
-        layout.addWidget(self.button_stop)
-        self.setLayout(layout)
 
-
-    @magicgui(call_button="Start simulation")
     def simulate(self,
                  map_height=100,
                  map_width=100,
@@ -43,7 +34,7 @@ class Darwin(QWidget):
 
         def _update_positions():
             # Reset the map
-            self.map = np.zeros((map_height, map_width), dtype=np.uint8)
+            self.map = np.zeros((map_height, map_width, 3), dtype=np.uint8)
             # Setup each individual
             index = 0
             while index < self.n_individuals:
@@ -52,10 +43,12 @@ class Darwin(QWidget):
                     self.individuals.pop(index)
                     self.n_individuals -= 1
                 else:
-                    self.map[indi.y, indi.x] = randint(100, 256)
+                    self.map[indi.y, indi.x, 0] = indi.color[0]
+                    self.map[indi.y, indi.x, 1] = indi.color[1]
+                    self.map[indi.y, indi.x, 2] = indi.color[2]
                     index += 1  # Only increase the index when not poping item
 
-        @thread_worker
+        @thread_worker(connect={"yielded": _update_viewer})
         def _simulate():
             # Initialising individuals
             y_pos = [y * map_height // self.n_individuals for y in range(0, self.n_individuals)]
@@ -86,17 +79,12 @@ class Darwin(QWidget):
                 for indi in self.individuals:
                     if indi.act(self.map):
                         _update_positions()
-                _update_positions()
                 yield self.map
                 sleep(dt)
 
         # Simulation
         self.n_individuals = n_individuals
-        worker = _simulate()
-        worker.yielded.connect(_update_viewer)
-        self.button_stop.clicked.connect(worker.quit)
-        worker.finished.connect(self.button_stop.clicked.disconnect)
-        worker.start()
+        _simulate()
 
 
 if __name__ == '__main__':
@@ -107,7 +95,8 @@ if __name__ == '__main__':
 
     # Adds widget to the viewer
     charles = Darwin(viewer)
-    viewer.window.add_dock_widget(charles, name="Natural selection simulator")
+    simulator = magicgui(charles.simulate, call_button="Simulate")
+    viewer.window.add_dock_widget(simulator, name="Natural selection simulator")
 
     # Run napari
     napari.run()

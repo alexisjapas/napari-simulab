@@ -1,3 +1,4 @@
+import numpy as np
 from random import randint, seed, choice
 
 
@@ -15,6 +16,7 @@ class Individual():
                  cost_reproducting) -> None:
         super().__init__()
         self.lab = lab
+        self.color = (randint(1, 255), randint(1, 255), randint(1, 255))
         self.genes = genes
         self.y = y
         self.x = x
@@ -55,9 +57,9 @@ class Individual():
             mov_pred_x = 0
 
         # Other individuals boundings
-        if map[self.y + mov_pred_y, self.x] != 0:
+        if np.sum(map[self.y + mov_pred_y, self.x, :]) != 0:
             mov_pred_y = 0
-        if map[self.y, self.x + mov_pred_x] != 0:
+        if np.sum(map[self.y, self.x + mov_pred_x, :]) != 0:
             mov_pred_x = 0
 
         # Proceed
@@ -77,13 +79,13 @@ class Individual():
     def reproduce(self, map):
         # Check available positions and secure map boundings
         available_pos = []
-        if self.y+1 < map.shape[0] and map[self.y + 1, self.x] == 0:
+        if self.y+1 < map.shape[0] and np.sum(map[self.y + 1, self.x, :]) == 0:
             available_pos.append((self.y + 1, self.x))
-        if self.y-1 >= 0 and map[self.y - 1, self.x] == 0:
+        if self.y-1 >= 0 and np.sum(map[self.y - 1, self.x, :]) == 0:
             available_pos.append((self.y - 1, self.x))
-        if self.x+1 < map.shape[1] and map[self.y, self.x + 1] == 0:
+        if self.x+1 < map.shape[1] and np.sum(map[self.y, self.x + 1, :]) == 0:
             available_pos.append((self.y, self.x + 1))
-        if self.x-1 >= 0 and map[self.y, self.x - 1] == 0:
+        if self.x-1 >= 0 and np.sum(map[self.y, self.x - 1, :]) == 0:
             available_pos.append((self.y, self.x - 1))
 
         # Reproduction
